@@ -1,0 +1,236 @@
+library(tidyverse)
+
+covidByState <- read_csv("COVID-19_Vaccinations_in_the_United_States_Jurisdiction_20211102.csv",
+                         col_types = cols(.default = col_character()))
+
+statePops <- read_csv("statePops.csv", col_names = T, col_types = "ciiiii")
+
+stateRef <- tibble(
+  full_name = c(state.name, "District of Columbia", "Puerto Rico", "United States"),
+  abbv = c(state.abb, "DC", "PR", "US")
+)
+
+
+covidByState %>% 
+  select(Date, Location, Series_Complete_Yes, Series_Complete_12Plus, Series_Complete_18Plus, Series_Complete_Pop_Pct) %>% 
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>% 
+  mutate(across(starts_with("Series_Complete"), as.numeric)) %>% 
+  mutate(Series_Complete_12_17 = Series_Complete_12Plus - Series_Complete_18Plus) %>% 
+  inner_join(stateRef, by = c("Location" = "abbv")) %>% 
+  inner_join(statePops, by = c("full_name" = "State")) -> covidWKids 
+
+### Getting the 8 week growth rate of 12 to 17 yr olds after approval
+vaxDelta12_17 <- covidWKids %>% 
+  filter(Date %in% c(as.Date("2021-05-13"), as.Date("2021-07-08")), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta = Series_Complete_12_17 - lead(Series_Complete_12_17, n = 52)) %>% 
+  filter(!is.na(Vax_Delta)) %>% 
+  mutate(Growth_Rate_12_17 = Vax_Delta / Pop_12_17) %>% 
+  select(Location, Growth_Rate_12_17)
+
+### Getting the growth rate of the last 4 weeks of 12 to 17 yr olds
+vaxDelta12_17_Last_Four <- covidWKids %>% 
+  filter(Date %in% c(max(Date), max(Date) - 28), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta = Series_Complete_12_17 - lead(Series_Complete_12_17, n = 52)) %>% 
+  filter(!is.na(Vax_Delta)) %>% 
+  mutate(Growth_Rate_12_17_Last_Four = Vax_Delta / Pop_12_17) %>% 
+  select(Location, Growth_Rate_12_17_Last_Four)
+
+### Getting the growth rate of 18+ in last 4 weeks  
+vaxDelta18_Plus_Last_Four <- covidWKids %>% 
+  filter(Date %in% c(max(Date), max(Date) - 28), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta = Series_Complete_18Plus - lead(Series_Complete_18Plus, n = 52)) %>% 
+  filter(!is.na(Vax_Delta)) %>% 
+  mutate(Growth_Rate_18_Plus_Last_Four = Vax_Delta / Pop_18_Plus) %>% 
+  select(Location, Growth_Rate_18_Plus_Last_Four)
+
+covidWKidsLatest <- covidWKids %>% 
+  filter(Date == max(Date))
+
+covidWKidsLatest %>% 
+  inner_join(vaxDelta12_17, by = "Location") %>% 
+  inner_join(vaxDelta12_17_Last_Four, by = "Location") %>% 
+  inner_join(vaxDelta18_Plus_Last_Four, by = "Location") %>% 
+  mutate(num_5_11_eoy_w_12_17_last_4_weeks_rate = round(
+    Pop_5_11 * Growth_Rate_12_17),
+         num_12_17_eoy_last_4_weeks_rate = round((Pop_12_17 * Growth_Rate_12_17_Last_Four) * (58 / 28)) + Series_Complete_12_17,
+         num_18_plus_eoy_last_4_weeks_rate = round((Pop_18_Plus * Growth_Rate_18_Plus_Last_Four) * (58 / 28)) + Series_Complete_18Plus,
+    proj_total_pop_vax_eoy = round(((num_5_11_eoy_w_12_17_last_4_weeks_rate + num_12_17_eoy_last_4_weeks_rate + num_18_plus_eoy_last_4_weeks_rate) / Total_Pop) * 100, 2),
+    vax_pct_5_11_eoy_w_12_17_first_four_week_rate = round(Growth_Rate_12_17 * 100, 2),
+    vax_pct_12_17_eoy_w_last_four_week_rate = round((num_12_17_eoy_last_4_weeks_rate / Pop_12_17) * 100, 2)
+    ) %>% 
+  select(full_name,
+         Series_Complete_Pop_Pct,
+         vax_pct_5_11_eoy_w_12_17_first_four_week_rate,
+         vax_pct_12_17_eoy_w_last_four_week_rate,
+         proj_total_pop_vax_eoy
+         ) %>% 
+  arrange(desc(proj_total_pop_vax_eoy)) -> totProj
+
+
+statesProj <- totProj %>% 
+  filter(full_name != "United States")
+
+natlProj <- totProj %>% 
+  filter(full_name == "United States")
+
+fullProj <- bind_rows(natlProj, statesProj) %>% 
+  mutate(across(2:5, ~paste0(as.character(.x), "%")))
+
+write_csv(fullProj, "vaxProjection5_11yrolds.csv")
+
+### Projection from 01/26/22 to 06/01/22 ###
+
+covidByState <- read_csv("COVID-19_Vaccinations_in_the_United_States_Jurisdiction_20220125.csv",
+                         col_types = cols(.default = col_character()))
+
+statePops <- read_csv("statePops.csv", col_names = T, col_types = "ciiii")
+
+stateRef <- tibble(
+  full_name = c(state.name, "District of Columbia", "Puerto Rico", "United States"),
+  abbv = c(state.abb, "DC", "PR", "US")
+)
+
+covidByState %>% 
+  select(Date, Location, Series_Complete_Yes, Series_Complete_12Plus, Series_Complete_18Plus, Series_Complete_Pop_Pct) %>% 
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>% 
+  mutate(across(starts_with("Series_Complete"), as.numeric)) %>% 
+  mutate(Series_Complete_12_17 = Series_Complete_12Plus - Series_Complete_18Plus,
+         Series_Complete_5_11 = Series_Complete_Yes - Series_Complete_12Plus) %>% 
+  inner_join(stateRef, by = c("Location" = "abbv")) %>% 
+  inner_join(statePops, by = c("full_name" = "State")) -> covidWKids 
+
+### Getting the growth rate of the last 4 weeks of 5 to 11 yr olds
+vaxDelta5_11_Last_Four <- covidWKids %>% 
+  filter(Date %in% c(max(Date), max(Date) - 28), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta_5_11 = Series_Complete_5_11 - lead(Series_Complete_5_11, n = 52)) %>% 
+  filter(!is.na(Vax_Delta_5_11)) %>% 
+  mutate(Growth_Rate_5_11_Last_Four = Vax_Delta_5_11 / Pop_5_11) %>% 
+  select(Location, Growth_Rate_5_11_Last_Four, Vax_Delta_5_11)
+
+
+### Getting the growth rate of the last 4 weeks of 12 to 17 yr olds
+vaxDelta12_17_Last_Four <- covidWKids %>% 
+  filter(Date %in% c(max(Date), max(Date) - 28), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta_12_17 = Series_Complete_12_17 - lead(Series_Complete_12_17, n = 52)) %>% 
+  filter(!is.na(Vax_Delta_12_17)) %>% 
+  mutate(Growth_Rate_12_17_Last_Four = Vax_Delta_12_17 / Pop_12_17) %>% 
+  select(Location, Growth_Rate_12_17_Last_Four, Vax_Delta_12_17)
+
+### Getting the growth rate of 18+ in last 4 weeks  
+vaxDelta18_Plus_Last_Four <- covidWKids %>% 
+  filter(Date %in% c(max(Date), max(Date) - 28), Location != "ID") %>% 
+  arrange(desc(Date), Location) %>% 
+  mutate(Vax_Delta_18Plus = Series_Complete_18Plus - lead(Series_Complete_18Plus, n = 52)) %>% 
+  filter(!is.na(Vax_Delta_18Plus)) %>% 
+  mutate(Growth_Rate_18_Plus_Last_Four = Vax_Delta_18Plus / Pop_18_Plus) %>% 
+  select(Location, Growth_Rate_18_Plus_Last_Four, Vax_Delta_18Plus)
+
+### June 1st projection
+covidWKidsLatest <- covidWKids %>% 
+  filter(Date == max(Date))
+
+covidWKidsLatest %>% 
+  inner_join(vaxDelta5_11_Last_Four, by = "Location") %>% 
+  inner_join(vaxDelta12_17_Last_Four, by = "Location") %>% 
+  inner_join(vaxDelta18_Plus_Last_Four, by = "Location") %>% 
+  mutate(num_5_11_eoy_last_4_weeks_rate = round(
+    (Pop_5_11 * Growth_Rate_5_11_Last_Four) *
+      (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))) / 28) + Series_Complete_5_11,
+    num_12_17_eoy_last_4_weeks_rate = round(
+        (Pop_12_17 * Growth_Rate_12_17_Last_Four) * 
+          (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))) / 28) + Series_Complete_12_17,
+    num_18_plus_eoy_last_4_weeks_rate = round(
+      (Pop_18_Plus * Growth_Rate_18_Plus_Last_Four) * 
+        (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))) / 28) + Series_Complete_18Plus,
+    proj_total_pop_vax_eoy = round(
+      ((num_5_11_eoy_last_4_weeks_rate + num_12_17_eoy_last_4_weeks_rate + num_18_plus_eoy_last_4_weeks_rate) / 
+         Total_Pop) * 100, 2),
+    vax_pct_5_11_eoy_w_last_four_week_rate = round((num_5_11_eoy_last_4_weeks_rate / Pop_5_11) * 100, 2),
+    vax_pct_12_17_eoy_w_last_four_week_rate = round((num_12_17_eoy_last_4_weeks_rate / Pop_12_17) * 100, 2)
+  ) %>% 
+  select(full_name,
+         Series_Complete_Pop_Pct,
+         vax_pct_5_11_eoy_w_last_four_week_rate,
+         vax_pct_12_17_eoy_w_last_four_week_rate,
+         proj_total_pop_vax_eoy
+  ) %>% 
+  arrange(desc(proj_total_pop_vax_eoy)) -> totProj
+
+### Much easier way
+covidWKidsLatest <- covidWKids %>% 
+  filter(Date == max(Date))
+
+covidWKidsLatest %>% 
+  inner_join(vaxDelta5_11_Last_Four, by = "Location") %>% 
+  inner_join(vaxDelta12_17_Last_Four, by = "Location") %>% 
+  inner_join(vaxDelta18_Plus_Last_Four, by = "Location") %>% 
+  mutate(num_5_11_eoy_last_4_weeks_rate = round(
+      ((Vax_Delta_5_11 / 28) * (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))))) + Series_Complete_5_11,
+    num_12_17_eoy_last_4_weeks_rate = round(
+      ((Vax_Delta_12_17 / 28) * (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))))) + Series_Complete_12_17,
+    num_18_plus_eoy_last_4_weeks_rate = round(
+      ((Vax_Delta_18Plus / 28) * (as.integer(as.Date("2022-06-01")) - as.integer(max(Date))))) + Series_Complete_18Plus,
+    proj_total_pop_vax_eoy = if_else(
+      ((num_5_11_eoy_last_4_weeks_rate + num_12_17_eoy_last_4_weeks_rate + num_18_plus_eoy_last_4_weeks_rate) / Total_Pop) > 1, 
+      100,
+      round(
+        ((num_5_11_eoy_last_4_weeks_rate + num_12_17_eoy_last_4_weeks_rate + num_18_plus_eoy_last_4_weeks_rate) / 
+           Total_Pop) * 100, 1)
+    ),
+    vax_pct_5_11_eoy_w_last_four_week_rate = if_else((num_5_11_eoy_last_4_weeks_rate / Pop_5_11) > 1,
+                                                     100,
+                                                     round((num_5_11_eoy_last_4_weeks_rate / Pop_5_11) * 100, 1)),
+    vax_pct_12_17_eoy_w_last_four_week_rate = if_else((num_12_17_eoy_last_4_weeks_rate / Pop_12_17) > 1,
+                                                      100,
+                                                      round((num_12_17_eoy_last_4_weeks_rate / Pop_12_17) * 100, 1))
+  ) %>% 
+  select(full_name,
+         Series_Complete_Pop_Pct,
+         vax_pct_5_11_eoy_w_last_four_week_rate,
+         vax_pct_12_17_eoy_w_last_four_week_rate,
+         proj_total_pop_vax_eoy
+  ) %>% 
+  arrange(desc(proj_total_pop_vax_eoy)) -> totProj_Two
+
+statesProj <- totProj_Two %>% 
+  filter(full_name != "United States")
+
+natlProj <- totProj_Two %>% 
+  filter(full_name == "United States")
+
+fullProj <- bind_rows(natlProj, statesProj) %>% 
+  mutate(across(2:5, ~paste0(as.character(.x), "%"))) %>% 
+  rename(`State/Territory/Federal District` = full_name,
+         `Projected percent of 5-11 vaccinated by June 1` = vax_pct_5_11_eoy_w_last_four_week_rate,
+         `Projected percent of 12-17 vaccinated by June 1` = vax_pct_12_17_eoy_w_last_four_week_rate,
+         `Projected total population vaccinated by June 1` = proj_total_pop_vax_eoy)
+
+write_csv(fullProj, "vaxProjectionChildren_20220601.csv")
+
+# Kids Vaccination Map 
+covidByState %>% 
+  select(Date, Location, Series_Complete_Yes, Series_Complete_12Plus, Series_Complete_18Plus, Series_Complete_5Plus) %>% 
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>% 
+  filter(Date == max(Date)) %>% 
+  mutate(across(starts_with("Series_Complete"), as.integer)) %>%
+  mutate(Series_Complete_5_11 = Series_Complete_5Plus - Series_Complete_12Plus,
+         Series_Complete_12_17 = Series_Complete_12Plus - Series_Complete_18Plus,
+         Series_Complete_U_18 = Series_Complete_Yes - Series_Complete_18Plus) %>% 
+  inner_join(stateRef, by = c("Location" = "abbv")) %>% 
+  inner_join(statePops, by = c("full_name" = "State")) %>% 
+  filter(!(Location %in% c("US", "PR"))) %>% 
+  mutate(Series_Complete_5_11Pop_Pct = round((Series_Complete_5_11 / Pop_5_11) * 100, 1),
+         Series_Complete_12_17Pop_Pct = round((Series_Complete_12_17 / Pop_12_17) * 100, 1),
+         Series_Complete_U_18Pop_Pct = round((Series_Complete_U_18 / (Total_Pop - Pop_18_Plus)) * 100, 1)) %>% 
+  select(Date, Location, full_name, Series_Complete_5_11Pop_Pct,
+         Series_Complete_12_17Pop_Pct, Series_Complete_U_18Pop_Pct) %>% 
+  arrange(full_name) -> kidsVaxMap
+
+write_csv(kidsVaxMap, "kidsVaxMap.csv")
+
+
