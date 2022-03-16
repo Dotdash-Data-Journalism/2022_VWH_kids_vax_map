@@ -36,7 +36,7 @@ jobs:
       # install c++ dependencies and install necessary packages
       - run: R -e 'renv::restore()'
       # execute Rscript
-      - run: Rscript verywell_health_kids_covid_map.R
+      - run: Rscript verywell_health_kids_covid_vax_map.R
         env: 
           DW_API_KEY: ${{ secrets.DW_API_KEY }}
           SCT_PW: ${{ secrets.SCT_PW }}
