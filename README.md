@@ -8,7 +8,7 @@ data by US state from the CDC. It then creates a CSV `kids_covid_19_vax_map.csv`
 latest day's vaccination rate for children 5 - 11 years old, children 12 - 17 years old and children under 18 years 
 old for each US state & Washington DC. The CSV is then sent via [API](https://developer.datawrapper.de/reference/introduction) 
 to update three [Datawrapper](https://www.datawrapper.de/) chloropleth maps of the COVID-19 vaccination rates by state for
- [Verywell health](https://www.verywellhealth.com/).
+[Verywell health](https://www.verywellhealth.com/).
 
 
 
