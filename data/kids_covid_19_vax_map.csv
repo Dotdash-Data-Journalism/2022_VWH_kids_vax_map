@@ -1,52 +1,20 @@
 date,location,full_name,series_complete_5_11pop_pct,series_complete_12_17pop_pct,series_complete_U_18pop_pct
-2022-07-13,AL,Alabama,11,35.1,16.4
-2022-07-13,AK,Alaska,27.4,56.8,29.1
-2022-07-13,AZ,Arizona,27.5,58.5,30.9
-2022-07-13,AR,Arkansas,17.4,46.4,22.7
-2022-07-13,CA,California,36.9,72.8,39.5
-2022-07-13,CO,Colorado,35.1,66.7,36.5
-2022-07-13,CT,Connecticut,43.1,76.6,44.8
-2022-07-13,DE,Delaware,30.7,61.4,33.1
-2022-07-13,DC,District of Columbia,48.5,79.2,39.1
-2022-07-13,FL,Florida,21.2,56.4,27.7
-2022-07-13,GA,Georgia,17,44,21.9
-2022-07-13,HI,Hawaii,45.3,83,44.5
-2022-07-13,ID,Idaho,19.4,54.4,26.4
-2022-07-13,IL,Illinois,37.8,63.9,37.2
-2022-07-13,IN,Indiana,20,43.1,22.7
-2022-07-13,IA,Iowa,25.2,50.2,26.8
-2022-07-13,KS,Kansas,25,53.1,27.8
-2022-07-13,KY,Kentucky,19.7,44.4,22.8
-2022-07-13,LA,Louisiana,12.7,39,18
-2022-07-13,ME,Maine,43.1,69.8,41.7
-2022-07-13,MD,Maryland,44,77.8,43.5
-2022-07-13,MA,Massachusetts,50.5,78.2,47.5
-2022-07-13,MI,Michigan,26.1,46.9,26.6
-2022-07-13,MN,Minnesota,39.6,64.1,37.5
-2022-07-13,MS,Mississippi,12.7,38.3,18.2
-2022-07-13,MO,Missouri,20.6,44.4,23.2
-2022-07-13,MT,Montana,21.5,44.7,23.7
-2022-07-13,NE,Nebraska,28.8,56.2,29.9
-2022-07-13,NV,Nevada,20.4,52.5,25.8
-2022-07-13,NH,New Hampshire,31.4,60.2,34.3
-2022-07-13,NJ,New Jersey,37.6,72.5,39.8
-2022-07-13,NM,New Mexico,33.5,67.8,36.8
-2022-07-13,NY,New York,38.4,71.7,38.9
-2022-07-13,NC,North Carolina,25,51,27.6
-2022-07-13,ND,North Dakota,21.3,44.9,22.2
-2022-07-13,OH,Ohio,23.5,44.9,24.7
-2022-07-13,OK,Oklahoma,16.7,45.7,21.9
-2022-07-13,OR,Oregon,33.6,64.3,35.5
-2022-07-13,PA,Pennsylvania,32.3,57.2,32.5
-2022-07-13,RI,Rhode Island,51.9,82.7,49.1
-2022-07-13,SC,South Carolina,18.8,45.6,23.2
-2022-07-13,SD,South Dakota,26.3,51.1,26.9
-2022-07-13,TN,Tennessee,16.4,39.3,19.8
-2022-07-13,TX,Texas,26.6,60,30.6
-2022-07-13,UT,Utah,29.1,63.4,32.6
-2022-07-13,VT,Vermont,58.7,80.8,51.7
-2022-07-13,VA,Virginia,41,74.1,41.4
-2022-07-13,WA,Washington,38.2,69.8,38.1
-2022-07-13,WV,West Virginia,15.6,42.7,21
-2022-07-13,WI,Wisconsin,30.4,54.7,31
-2022-07-13,WY,Wyoming,13.9,36.2,17.6
+2021-03-02,AK,Alaska,0,0,0
+2021-03-02,AR,Arkansas,0,0,0
+2021-03-02,CA,California,0,0,0
+2021-03-02,CO,Colorado,0,0,0
+2021-03-02,FL,Florida,0,0,0
+2021-03-02,HI,Hawaii,0,0,0
+2021-03-02,IN,Indiana,0,0,0
+2021-03-02,IA,Iowa,0,0,0
+2021-03-02,MD,Maryland,0,0,0
+2021-03-02,MN,Minnesota,0,0,0
+2021-03-02,MO,Missouri,0,0,0
+2021-03-02,MT,Montana,0,0,0
+2021-03-02,NE,Nebraska,0,0,0
+2021-03-02,NH,New Hampshire,0,0,0
+2021-03-02,NM,New Mexico,0,0,0
+2021-03-02,OH,Ohio,0,0,0
+2021-03-02,PA,Pennsylvania,0,0,0
+2021-03-02,SC,South Carolina,0,0,0
+2021-03-02,WY,Wyoming,0,0,0
