@@ -32,7 +32,6 @@ date,location,full_name,series_complete_5_11pop_pct,series_complete_12_17pop_pct
 2022-11-02,NJ,New Jersey,39.4,73.6,42
 2022-11-02,NM,New Mexico,35.8,69,38.9
 2022-11-02,NY,New York,40.1,73,41.1
-2022-11-02,NC,North Carolina,26.7,52.3,29.4
 2022-11-02,ND,North Dakota,23.3,46.6,23.9
 2022-11-02,OH,Ohio,24.9,45.6,26.3
 2022-11-02,OK,Oklahoma,17.7,46.9,23
@@ -47,6 +46,4 @@ date,location,full_name,series_complete_5_11pop_pct,series_complete_12_17pop_pct
 2022-11-02,VT,Vermont,61.2,81.8,56.2
 2022-11-02,VA,Virginia,43.6,75.4,44.2
 2022-11-02,WA,Washington,40.4,71,41.5
-2022-11-02,WV,West Virginia,16.5,43.3,21.9
-2022-11-02,WI,Wisconsin,32,55.5,33.1
 2022-11-02,WY,Wyoming,14.6,36.9,18.4
